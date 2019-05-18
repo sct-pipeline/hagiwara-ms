@@ -11,10 +11,6 @@ Description of the publicly-available database and processing pipeline for the "
 
 ## Data collection and organization
 
-The "Spine Generic" MRI acquisition protocol is available at [this link](https://osf.io/tt4z9/). Each site scanned six healthy subjects (3 men, 3 women), aged between 20 and 40 y.o. Note: there is a flexibility here, and if you wish to scan more than 6 subjects, you are welcome to. If your site is interested in participating in this publicly-available database, please contact Julien Cohen-Adad for details.
-
-### Data conversion: DICOM to BIDS
-
 To facilitate the collection, sharing and processing of data, we use the [BIDS standard](http://bids.neuroimaging.io/). An example of the data structure for one center is shown below:
 
 ~~~
@@ -50,19 +46,15 @@ spineGeneric_multiSubjects
 
 To convert your DICOM data folder to the compatible BIDS structure, we ask you
 to install [dcm2bids](https://github.com/cbedetti/Dcm2Bids#install). Once installed,
-[download this config file](https://raw.githubusercontent.com/sct-pipeline/spine-generic/master/config_spine.txt) (click File>Save to save the file), then convert your Dicom folder using the following
-command (replace xx with your center and subject number):
+convert your Dicom folder using the following
+command (replace xx with your subject number):
 ~~~
 dcm2bids -d <PATH_DICOM> -p sub-xx -c config_spine.txt -o CENTER_spineGeneric
 ~~~
 
 For example:
 ~~~
-dcm2bids -d /Users/julien/Desktop/DICOM_subj3 -p sub-milan03 -c ~/Desktop/config_spine.txt -o milan_spineGeneric
+dcm2bids -d /Users/julien/Desktop/DICOM_subj3 -p sub-C01 -c ~/Desktop/config_spine.txt -o my_subjects
 ~~~
 
-A log file is generated under `tmp_dcm2bids/log/`. If you encounter any problem while
-running the script, please [open an issue](https://github.com/sct-pipeline/spine-generic/issues)
-and upload the log file. We will offer support.
-
-Once you've converted all subjects for the study, create the following files and add them to the data structure:
+A log file is generated under `tmp_dcm2bids/log/`.
