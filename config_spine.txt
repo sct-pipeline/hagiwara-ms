@@ -4,7 +4,6 @@
             "dataType": "anat",
             "modalityLabel": "T2w",
             "criteria": {
-                "SeriesDescription": "T2w",
                 "ProtocolName": "3D_t2_space_sag"
             }
         },
@@ -20,7 +19,6 @@
             "modalityLabel": "MTS",
             "customLabels": "acq-MTon",
             "criteria": {
-                "SeriesDescription": "GRE-MT1",
                 "ProtocolName": "MT+_sag_non-sel*"
             }
         },
