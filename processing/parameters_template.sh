@@ -3,7 +3,7 @@
 
 # Set every other path relative to this path for convenience
 # Do not add "/" at the end. Path should be absolute (i.e. do not use "~")
-export PATH_PARENT="/Users/julien/spineGeneric_multiSubjects"
+export PATH_PARENT="/Users/julien/Desktop/hagiwara"
 
 # Path to the folder containing the BIDS dataset.
 # Do not add "/" at the end. Path should be absolute (i.e. do not use "~")
@@ -25,7 +25,7 @@ export PATH_SEGMANUAL="${PATH_PARENT}/seg_manual"
 # )
 
 # Number of jobs for parallel processing
-export JOBS=20
+export JOBS=4
 
 # Number of jobs for ANTs routine. Set to 1 if ANTs functions crash when CPU saturates.
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
