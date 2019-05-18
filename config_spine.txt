@@ -1,0 +1,52 @@
+{
+    "descriptions": [
+        {
+            "dataType": "anat",
+            "modalityLabel": "T2w",
+            "criteria": {
+                "SeriesDescription": "T2w",
+                "ProtocolName": "3D_t2_space_sag"
+            }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "T2star",
+            "criteria": {
+                "ProtocolName": "C_t2star_medic_tra_multi"
+            }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "MTS",
+            "customLabels": "acq-MTon",
+            "criteria": {
+                "SeriesDescription": "GRE-MT1",
+                "ProtocolName": "MT+_sag_non-sel*"
+            }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "MTS",
+            "customLabels": "acq-MToff",
+            "criteria": {
+                "ProtocolName": "PD_sag_non-sel*"
+            }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "MTS",
+            "customLabels": "acq-T1w",
+            "criteria": {
+                "ProtocolName": "T1_sag_non-sel*"
+            }
+        },
+        {
+            "dataType": "dwi",
+            "modalityLabel": "dwi",
+            "criteria": {
+                "ProtocolName": "resSlA5_MDDW20_tra_4mm_p2_*",
+                "SeriesDescription": "resSlA5_MDDW20_tra_4mm_p2_M3P2_ES0.5_b1000-2000"
+                }
+        }
+    ]
+}
