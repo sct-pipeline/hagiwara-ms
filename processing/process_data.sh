@@ -47,7 +47,7 @@ label_if_does_not_exist(){
     rsync -avzh "${PATH_SEGMANUAL}/${file}_labels-manual.nii.gz" ${FILELABEL}.nii.gz
   else
     # Generate labeled segmentation
-    sct_label_vertebrae -i ${file}.nii.gz -s ${file_seg}.nii.gz -c t1 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+    sct_label_vertebrae -i ${file}.nii.gz -s ${file_seg}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
     # Create labels in the cord at C3 and C5 mid-vertebral levels
     sct_label_utils -i ${file_seg}_labeled.nii.gz -vert-body 3,5 -o ${FILELABEL}.nii.gz
   fi
@@ -100,30 +100,30 @@ get_field_from_json(){
 # Go to anat folder where all structural data are located
 cd ${SUBJECT}/anat/
 
-# T1w
-# ------------------------------------------------------------------------------
-file_t1="${SUBJECT}_T1w"
-# Reorient to RPI and resample to 1mm iso (supposed to be the effective resolution)
-sct_image -i ${file_t1}.nii.gz -setorient RPI -o ${file_t1}_RPI.nii.gz
-sct_resample -i ${file_t1}_RPI.nii.gz -mm 1x1x1 -o ${file_t1}_RPI_r.nii.gz
-file_t1="${file_t1}_RPI_r"
-# Segment spinal cord (only if it does not exist)
-segment_if_does_not_exist $file_t1 "t1"
-file_t1_seg=$FILESEG
-# Create labels in the cord at C2 and C5 mid-vertebral levels (only if it does not exist)
-label_if_does_not_exist ${file_t1} ${file_t1_seg}
-file_label=$FILELABEL
-# Register to PAM50 template
-sct_register_to_template -i ${file_t1}.nii.gz -s ${file_t1_seg}.nii.gz -l ${file_label}.nii.gz -c t1 -param step=1,type=seg,algo=centermassrot:step=2,type=seg,algo=syn,slicewise=1,smooth=0,iter=5:step=3,type=im,algo=syn,slicewise=1,smooth=0,iter=3 -qc ${PATH_QC} -qc-subject ${SUBJECT}
-# Rename warping fields for clarity
-mv warp_template2anat.nii.gz warp_template2T1w.nii.gz
-mv warp_anat2template.nii.gz warp_T1w2template.nii.gz
-# Warp template without the white matter atlas (we don't need it at this point)
-sct_warp_template -d ${file_t1}.nii.gz -w warp_template2T1w.nii.gz -a 0 -ofolder label_T1w
-# Flatten scan along R-L direction (to make nice figures)
-sct_flatten_sagittal -i ${file_t1}.nii.gz -s ${file_t1_seg}.nii.gz
-# Compute average cord CSA between C2 and C3
-sct_process_segmentation -i ${file_t1_seg}.nii.gz -vert 2:3 -vertfile label_T1w/template/PAM50_levels.nii.gz -o ${PATH_OUTPUT}/csa-SC_T1w.csv -append 1
+# # T1w
+# # ------------------------------------------------------------------------------
+# file_t1="${SUBJECT}_T1w"
+# # Reorient to RPI and resample to 1mm iso (supposed to be the effective resolution)
+# sct_image -i ${file_t1}.nii.gz -setorient RPI -o ${file_t1}_RPI.nii.gz
+# sct_resample -i ${file_t1}_RPI.nii.gz -mm 1x1x1 -o ${file_t1}_RPI_r.nii.gz
+# file_t1="${file_t1}_RPI_r"
+# # Segment spinal cord (only if it does not exist)
+# segment_if_does_not_exist $file_t1 "t1"
+# file_t1_seg=$FILESEG
+# # Create labels in the cord at C2 and C5 mid-vertebral levels (only if it does not exist)
+# label_if_does_not_exist ${file_t1} ${file_t1_seg}
+# file_label=$FILELABEL
+# # Register to PAM50 template
+# sct_register_to_template -i ${file_t1}.nii.gz -s ${file_t1_seg}.nii.gz -l ${file_label}.nii.gz -c t1 -param step=1,type=seg,algo=centermassrot:step=2,type=seg,algo=syn,slicewise=1,smooth=0,iter=5:step=3,type=im,algo=syn,slicewise=1,smooth=0,iter=3 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+# # Rename warping fields for clarity
+# mv warp_template2anat.nii.gz warp_template2T1w.nii.gz
+# mv warp_anat2template.nii.gz warp_T1w2template.nii.gz
+# # Warp template without the white matter atlas (we don't need it at this point)
+# sct_warp_template -d ${file_t1}.nii.gz -w warp_template2T1w.nii.gz -a 0 -ofolder label_T1w
+# # Flatten scan along R-L direction (to make nice figures)
+# sct_flatten_sagittal -i ${file_t1}.nii.gz -s ${file_t1_seg}.nii.gz
+# # Compute average cord CSA between C2 and C3
+# sct_process_segmentation -i ${file_t1_seg}.nii.gz -vert 2:3 -vertfile label_T1w/template/PAM50_levels.nii.gz -o ${PATH_OUTPUT}/csa-SC_T1w.csv -append 1
 
 # T2
 # ------------------------------------------------------------------------------
@@ -137,10 +137,18 @@ segment_if_does_not_exist $file_t2 "t2"
 file_t2_seg=$FILESEG
 # Flatten scan along R-L direction (to make nice figures)
 sct_flatten_sagittal -i ${file_t2}.nii.gz -s ${file_t2_seg}.nii.gz
-# Bring vertebral level into T2 space
-sct_register_multimodal -i label_T1w/template/PAM50_levels.nii.gz -d ${file_t2_seg}.nii.gz -o PAM50_levels2${file_t2}.nii.gz -identity 1 -x nn
+# Create labels in the cord at C2 and C5 mid-vertebral levels (only if it does not exist)
+label_if_does_not_exist ${file_t2} ${file_t2_seg}
+file_label=$FILELABEL
+# Register to PAM50 template
+sct_register_to_template -i ${file_t2}.nii.gz -s ${file_t2_seg}.nii.gz -l ${file_label}.nii.gz -c t2 -param step=1,type=seg,algo=centermassrot:step=2,type=seg,algo=syn,slicewise=1,smooth=0,iter=5:step=3,type=im,algo=syn,slicewise=1,smooth=0,iter=3 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+# Rename warping fields for clarity
+mv warp_template2anat.nii.gz warp_template2T2w.nii.gz
+mv warp_anat2template.nii.gz warp_T2w2template.nii.gz
+# Warp template without the white matter atlas (we don't need it at this point)
+sct_warp_template -d ${file_t2}.nii.gz -w warp_template2T2w.nii.gz -a 0 -ofolder label_T2w
 # Compute average cord CSA between C2 and C3
-sct_process_segmentation -i ${file_t2_seg}.nii.gz -vert 2:3 -vertfile PAM50_levels2${file_t2}.nii.gz -o ${PATH_OUTPUT}/csa-SC_T2w.csv -append 1
+sct_process_segmentation -i ${file_t2_seg}.nii.gz -vert 2:3 -vertfile label_T2w/template/PAM50_levels.nii.gz -o ${PATH_OUTPUT}/csa-SC_T2w.csv -append 1
 
 # MTS
 # ------------------------------------------------------------------------------
@@ -170,7 +178,7 @@ file_mtoff="${file_mtoff}_reg"
 sct_register_multimodal -i ${file_mton}.nii.gz -d ${file_t1w}.nii.gz -param step=1,type=im,algo=rigid,slicewise=1,metric=CC -x spline
 file_mton="${file_mton}_reg"
 # Register template->T1w_ax (using template-T1w as initial transformation)
-sct_register_multimodal -i $SCT_DIR/data/PAM50/template/PAM50_t1.nii.gz -iseg $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz -d ${file_t1w}.nii.gz -dseg ${file_t1w_seg}.nii.gz -param step=1,type=seg,algo=slicereg,metric=MeanSquares,smooth=2:step=2,type=im,algo=bsplinesyn,metric=MeanSquares,iter=5,gradStep=0.5 -initwarp warp_template2T1w.nii.gz -initwarpinv warp_T1w2template.nii.gz
+sct_register_multimodal -i $SCT_DIR/data/PAM50/template/PAM50_t1.nii.gz -iseg $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz -d ${file_t1w}.nii.gz -dseg ${file_t1w_seg}.nii.gz -param step=1,type=seg,algo=slicereg,metric=MeanSquares,smooth=2:step=2,type=im,algo=bsplinesyn,metric=MeanSquares,iter=5,gradStep=0.5 -initwarp warp_template2T2w.nii.gz -initwarpinv warp_T2w2template.nii.gz
 # Rename warping field for clarity
 mv warp_PAM50_t12${file_t1w}.nii.gz warp_template2axT1w.nii.gz
 mv warp_${file_t1w}2PAM50_t1.nii.gz warp_axT1w2template.nii.gz
@@ -185,22 +193,22 @@ sct_extract_metric -i mtr.nii.gz -f label_axT1w/atlas -l 51 -vert 2:5 -vertfile 
 sct_extract_metric -i mtsat.nii.gz -f label_axT1w/atlas -l 51 -vert 2:5 -vertfile label_axT1w/template/PAM50_levels.nii.gz -o ${PATH_OUTPUT}/MTsat.csv -append 1
 sct_extract_metric -i t1map.nii.gz -f label_axT1w/atlas -l 51 -vert 2:5 -vertfile label_axT1w/template/PAM50_levels.nii.gz -o ${PATH_OUTPUT}/T1.csv -append 1
 
-# t2s
-# ------------------------------------------------------------------------------
-file_t2s="${SUBJECT}_T2star"
-# Compute root-mean square across 4th dimension (if it exists), corresponding to all echoes in Philips scans.
-sct_maths -i ${file_t2s}.nii.gz -rms t -o ${file_t2s}_rms.nii.gz
-file_t2s="${file_t2s}_rms"
-# Bring vertebral level into T2s space
-sct_register_multimodal -i label_T1w/template/PAM50_levels.nii.gz -d ${file_t2s}.nii.gz -o PAM50_levels2${file_t2s}.nii.gz -identity 1 -x nn
-# Segment gray matter (only if it does not exist)
-segment_gm_if_does_not_exist $file_t2s "t2s"
-file_t2s_seg=$FILESEG
-# Compute the gray matter CSA between C3 and C4 levels
-# NB: Here we set -no-angle 1 because we do not want angle correction: it is too
-# unstable with GM seg, and t2s data were acquired orthogonal to the cord anyways.
-sct_process_segmentation -i ${file_t2s_seg}.nii.gz -angle-corr 0 -vert 3:4 -vertfile PAM50_levels2${file_t2s}.nii.gz -o ${PATH_OUTPUT}/csa-GM_T2s.csv -append 1
-
+# # t2s
+# # ------------------------------------------------------------------------------
+# file_t2s="${SUBJECT}_T2star"
+# # Compute root-mean square across 4th dimension (if it exists), corresponding to all echoes in Philips scans.
+# sct_maths -i ${file_t2s}.nii.gz -rms t -o ${file_t2s}_rms.nii.gz
+# file_t2s="${file_t2s}_rms"
+# # Bring vertebral level into T2s space
+# sct_register_multimodal -i label_T1w/template/PAM50_levels.nii.gz -d ${file_t2s}.nii.gz -o PAM50_levels2${file_t2s}.nii.gz -identity 1 -x nn
+# # Segment gray matter (only if it does not exist)
+# segment_gm_if_does_not_exist $file_t2s "t2s"
+# file_t2s_seg=$FILESEG
+# # Compute the gray matter CSA between C3 and C4 levels
+# # NB: Here we set -no-angle 1 because we do not want angle correction: it is too
+# # unstable with GM seg, and t2s data were acquired orthogonal to the cord anyways.
+# sct_process_segmentation -i ${file_t2s_seg}.nii.gz -angle-corr 0 -vert 3:4 -vertfile PAM50_levels2${file_t2s}.nii.gz -o ${PATH_OUTPUT}/csa-GM_T2s.csv -append 1
+#
 # DWI
 # ------------------------------------------------------------------------------
 cd ../dwi
@@ -220,7 +228,7 @@ file_dwi_mean=${SUBJECT}_dwi_crop_moco_dwi_mean
 segment_if_does_not_exist ${file_dwi_mean} "dwi"
 file_dwi_seg=$FILESEG
 # Register template->dwi (using template-T1w as initial transformation)
-sct_register_multimodal -i $SCT_DIR/data/PAM50/template/PAM50_t1.nii.gz -iseg $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz -d ${file_dwi_mean}.nii.gz -dseg ${file_dwi_seg}.nii.gz -param step=1,type=seg,algo=slicereg,metric=MeanSquares,smooth=2:step=2,type=im,algo=bsplinesyn,metric=MeanSquares,iter=5,gradStep=0.5 -initwarp ../anat/warp_template2T1w.nii.gz -initwarpinv ../anat/warp_T1w2template.nii.gz
+sct_register_multimodal -i $SCT_DIR/data/PAM50/template/PAM50_t1.nii.gz -iseg $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz -d ${file_dwi_mean}.nii.gz -dseg ${file_dwi_seg}.nii.gz -param step=1,type=seg,algo=slicereg,metric=MeanSquares,smooth=2:step=2,type=im,algo=bsplinesyn,metric=MeanSquares,iter=5,gradStep=0.5 -initwarp ../anat/warp_template2T2w.nii.gz -initwarpinv ../anat/warp_T2w2template.nii.gz
 # Rename warping field for clarity
 mv warp_PAM50_t12${file_dwi_mean}.nii.gz warp_template2dwi.nii.gz
 mv warp_${file_dwi_mean}2PAM50_t1.nii.gz warp_dwi2template.nii.gz
@@ -240,16 +248,15 @@ cd ..
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  "anat/${SUBJECT}_T1w_RPI_r_seg.nii.gz"
   "anat/${SUBJECT}_T2w_RPI_r_seg.nii.gz"
-  "anat/label_axT1w/template/PAM50_levels.nii.gz"
+  # "anat/label_axT1w/template/PAM50_levels.nii.gz"
   "anat/mtr.nii.gz"
   "anat/mtsat.nii.gz"
-  "anat/t1map.nii.gz"
-  "anat/${SUBJECT}_T2star_rms_gmseg.nii.gz"
+  # "anat/t1map.nii.gz"
+  # "anat/${SUBJECT}_T2star_rms_gmseg.nii.gz"
   "dwi/dti_FA.nii.gz"
-  "dwi/dti_MD.nii.gz"
-  "dwi/dti_RD.nii.gz"
+  # "dwi/dti_MD.nii.gz"
+  # "dwi/dti_RD.nii.gz"
   "dwi/label/atlas/PAM50_atlas_00.nii.gz"
 )
 for file in ${FILES_TO_CHECK[@]}; do
